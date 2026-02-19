@@ -79,6 +79,9 @@ RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/od
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
 
+# Install additional Python dependencies for extra modules
+RUN pip3 install --break-system-packages qifparse
+
 # Copy entrypoint script and Odoo configuration file
 COPY ./docker/entrypoint.sh /
 COPY ./config/odoo.conf /etc/odoo/
