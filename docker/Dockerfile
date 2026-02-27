@@ -62,13 +62,7 @@ RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/s
 
 # install latest postgresql-client
 RUN echo 'deb https://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
-    && GNUPGHOME="$(mktemp -d)" \
-    && export GNUPGHOME \
-    && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
-    && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
-    && gpg --batch --armor --export "${repokey}" > /etc/apt/trusted.gpg.d/pgdg.gpg.asc \
-    && gpgconf --kill all \
-    && rm -rf "$GNUPGHOME" \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc > /etc/apt/trusted.gpg.d/pgdg.gpg.asc \
     && apt-get update  \
     && apt-get install --no-install-recommends -y postgresql-client \
     && rm -f /etc/apt/sources.list.d/pgdg.list \
