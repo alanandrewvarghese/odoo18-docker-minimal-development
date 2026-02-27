@@ -11,9 +11,11 @@ ARG TARGETARCH
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get install -y --no-install-recommends \
+# Workaround: disable HTTP pipelining to avoid 400 Bad Request from proxies
+RUN echo 'Acquire::http::Pipeline-Depth "0";' > /etc/apt/apt.conf.d/99disable-pipeline \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y --no-install-recommends --fix-missing \
         ca-certificates \
         curl \
         dirmngr \
@@ -37,12 +39,12 @@ RUN apt-get update && \
         python3-watchdog \
         python3-xlrd \
         python3-xlwt \
-        xz-utils && \
-    if [ -z "${TARGETARCH}" ]; then \
+        xz-utils \
+    && if [ -z "${TARGETARCH}" ]; then \
         TARGETARCH="$(dpkg --print-architecture)"; \
-    fi; \
-    WKHTMLTOPDF_ARCH=${TARGETARCH} && \
-    case ${TARGETARCH} in \
+    fi \
+    && WKHTMLTOPDF_ARCH=${TARGETARCH} \
+    && case ${TARGETARCH} in \
     "amd64") WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=967390a759707337b46d1c02452e2bb6b2dc6d59  ;; \
     "arm64")  WKHTMLTOPDF_SHA=90f6e69896d51ef77339d3f3a20f8582bdf496cc  ;; \
     "ppc64le" | "ppc64el") WKHTMLTOPDF_ARCH=ppc64el && WKHTMLTOPDF_SHA=5312d7d34a25b321282929df82e3574319aed25c  ;; \
