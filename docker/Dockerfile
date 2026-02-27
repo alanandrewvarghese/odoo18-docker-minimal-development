@@ -11,13 +11,18 @@ ARG TARGETARCH
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 
-# Workaround: switch to HTTPS mirrors to bypass proxy returning 400 Bad Request
+# Phase 1: Install ca-certificates over HTTP so we can switch to HTTPS
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Phase 2: Switch to HTTPS mirrors to bypass proxy returning 400 Bad Request
 RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources \
     && sed -i 's|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
-        ca-certificates \
         curl \
         dirmngr \
         fonts-noto-cjk \
