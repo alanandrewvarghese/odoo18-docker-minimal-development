@@ -11,11 +11,12 @@ ARG TARGETARCH
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 
-# Workaround: disable HTTP pipelining to avoid 400 Bad Request from proxies
-RUN echo 'Acquire::http::Pipeline-Depth "0";' > /etc/apt/apt.conf.d/99disable-pipeline \
+# Workaround: switch to HTTPS mirrors to bypass proxy returning 400 Bad Request
+RUN sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources \
+    && sed -i 's|http://security.ubuntu.com|https://security.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources \
     && apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
-    apt-get install -y --no-install-recommends --fix-missing \
+    apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         dirmngr \
@@ -55,7 +56,7 @@ RUN echo 'Acquire::http::Pipeline-Depth "0";' > /etc/apt/apt.conf.d/99disable-pi
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
 # install latest postgresql-client
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb https://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
@@ -73,8 +74,8 @@ RUN npm install -g rtlcss
 
 # Install Odoo
 ENV ODOO_VERSION 18.0
-ARG ODOO_RELEASE=20260209
-ARG ODOO_SHA=791ed4bab149a07c756b5188f69f600b40cefd46
+ARG ODOO_RELEASE=20260217
+ARG ODOO_SHA=512f99d2d5bc218fe7a34d47e710ae2fe3e0ab21
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
