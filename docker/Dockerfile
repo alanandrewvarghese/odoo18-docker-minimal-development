@@ -1,5 +1,5 @@
-FROM ubuntu:noble
-MAINTAINER Odoo S.A. <info@odoo.com>
+FROM ubuntu:24.04
+LABEL maintainer="Odoo S.A. <info@odoo.com>"
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -73,16 +73,16 @@ RUN npm install -g rtlcss
 
 # Install Odoo
 ENV ODOO_VERSION 18.0
-ARG ODOO_RELEASE=20260217
-ARG ODOO_SHA=512f99d2d5bc218fe7a34d47e710ae2fe3e0ab21
-RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
+ENV ODOO_RELEASE 20260305
+ENV ODOO_SHA b085e04780b300e662cd621bf7f7da7037214f30
+RUN curl -o odoo.deb -sSL https://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
 
 # Install additional Python dependencies for extra modules
-RUN pip3 install --break-system-packages qifparse
+RUN pip3 install --break-system-packages qifparse imgkit
 
 # Copy entrypoint script and Odoo configuration file
 COPY ./docker/entrypoint.sh /

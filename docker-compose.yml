@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16
-    container_name: odoo18-db
+    container_name: sd_odoo18-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: postgres
@@ -10,7 +10,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - "5434:5432"
+      - "5444:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U odoo -d postgres"]
       interval: 5s
@@ -21,15 +21,15 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: odoo18-app
+    container_name: sd_odoo18-app
     restart: "no"
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "8069:8069"
-      - "8071:8071"
-      - "8072:8072"
+      - "8079:8069"
+      - "8081:8071"
+      - "8082:8072"
     environment:
       HOST: db
       PORT: 5432
@@ -39,6 +39,8 @@ services:
     volumes:
       - odoo-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
+      - ./oca-accounting-addons:/mnt/oca-accounting-addons
+      - ./odoo18-demo:/mnt/odoo18-demo
       - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
 
 volumes:
